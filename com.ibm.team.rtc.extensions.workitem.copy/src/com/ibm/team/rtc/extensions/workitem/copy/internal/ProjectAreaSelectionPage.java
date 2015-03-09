@@ -58,7 +58,7 @@ public class ProjectAreaSelectionPage extends WizardPage {
 	private ComboViewer fComboViewer;
 
 	public ProjectAreaSelectionPage(EvaluationContext context) {
-		super("Select a Project Area", "Select Project Area", null);
+		super("Select Project Area", "Select Project Area", null);
 		fContext= context;
 	}
 
