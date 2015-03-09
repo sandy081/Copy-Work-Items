@@ -88,6 +88,9 @@ public class CopyWorkItemsJob {
 				SubMonitor singleMonitor= creationMonitor.newChild(1);
 				singleMonitor.setTaskName("Creating Work Item " + "(" + counter + " of " + totalResultsSize + ")");
 				String targetType= new WorkItemTypeProcessor().getMapping(null, targetAttributes.findAttribute(IWorkItem.TYPE_PROPERTY, singleMonitor), source.getWorkItemType(), fContext, singleMonitor);
+				if (targetType == null) {
+					throw new TeamRepositoryException("Mapping not found for work item type: " + source.getWorkItemType());
+				}
 				WorkItemWorkingCopy target= newTarget(targetType, singleMonitor);
 				
 				fContext.sourceContext.addPair(source, target.getWorkItem());
@@ -174,9 +177,6 @@ public class CopyWorkItemsJob {
 
 	private WorkItemWorkingCopy newTarget(String type, IProgressMonitor monitor) throws TeamRepositoryException {
 		IWorkItemType workitemType= fContext.targetContext.workItemClient.findWorkItemType(fContext.targetContext.projectArea, type, monitor);
-		if (workitemType == null) {
-			throw new TeamRepositoryException("Mapping not found for work item type: " + type);
-		}
 		IWorkItemHandle workItemHandle= fContext.targetContext.workingCopyManager.connectNew(workitemType, monitor);
 		return fContext.targetContext.workingCopyManager.getWorkingCopy(workItemHandle);
 	}
