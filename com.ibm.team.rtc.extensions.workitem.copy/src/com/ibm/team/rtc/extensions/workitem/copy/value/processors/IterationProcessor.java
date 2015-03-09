@@ -29,7 +29,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 public class IterationProcessor extends AbstractValueProcessor<IIterationHandle> {
 
 	@Override
-	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IIterationHandle sourceValue, final EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IAttribute sourceAttribute, IIterationHandle sourceValue, final EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		if (sourceValue != null) {
 			Map<String, BacklogPair> sourceBacklogs= getBacklogInformation(context.sourceContext, monitor);
 			for (BacklogPair pair : sourceBacklogs.values()) {

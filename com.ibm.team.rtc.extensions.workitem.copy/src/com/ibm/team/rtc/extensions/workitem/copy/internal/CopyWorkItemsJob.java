@@ -102,11 +102,11 @@ public class CopyWorkItemsJob {
 			String targetType= new WorkItemTypeProcessor().getMapping(null, targetAttributes.findAttribute(IWorkItem.TYPE_PROPERTY, singleMonitor), source.getWorkItemType(), fContext, preparingMonitor);
 			WorkItemWorkingCopy target= newTarget(targetType, singleMonitor);
 
-			for (IAttribute attribute : sourceAttributes) {
-				IValueProcessor<Object> processor= (IValueProcessor<Object>)ValueProcessors.getProcessor(attribute);
-				IAttribute targetAttribute= targetAttributes.findAttribute(attribute.getIdentifier(), singleMonitor);
-				if (source.hasAttribute(attribute)) {
-					processor.prepareTargetValue(target.getWorkItem(), targetAttribute, source.getValue(attribute), fContext, singleMonitor);
+			for (IAttribute sourceAttribute : sourceAttributes) {
+				IValueProcessor<Object> processor= (IValueProcessor<Object>)ValueProcessors.getProcessor(sourceAttribute);
+				IAttribute targetAttribute= targetAttributes.findAttribute(sourceAttribute.getIdentifier(), singleMonitor);
+				if (source.hasAttribute(sourceAttribute)) {
+					processor.prepareTargetValue(target.getWorkItem(), targetAttribute, sourceAttribute, source.getValue(sourceAttribute), fContext, singleMonitor);
 				}
 			}
 

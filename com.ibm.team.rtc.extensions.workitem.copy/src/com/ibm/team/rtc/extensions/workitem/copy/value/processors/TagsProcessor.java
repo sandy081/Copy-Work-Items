@@ -23,7 +23,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 public class TagsProcessor extends AbstractValueProcessor<List<String>> {
 
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, List<String> sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, List<String> sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		List<String> targetValue= new ArrayList<String>(sourceValue);
 		if (context.configuration.tags != null) {
 			SeparatedStringList list= new SeparatedStringList(context.configuration.tags);

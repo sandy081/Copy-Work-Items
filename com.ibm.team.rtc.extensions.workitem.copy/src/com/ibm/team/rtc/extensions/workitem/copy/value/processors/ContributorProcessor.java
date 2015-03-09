@@ -25,7 +25,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 @SuppressWarnings("restriction")
 public class ContributorProcessor extends AbstractValueProcessor<IContributorHandle> {
 
-	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IContributorHandle sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IAttribute sourceAttribute, IContributorHandle sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
 		if (sourceValue == null) {
 			return;
 		}

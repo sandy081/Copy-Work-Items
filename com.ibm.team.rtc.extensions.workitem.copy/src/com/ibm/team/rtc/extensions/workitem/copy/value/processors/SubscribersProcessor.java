@@ -27,7 +27,7 @@ public class SubscribersProcessor implements IValueProcessor<List<IContributorHa
 
 	private final ContributorProcessor fContributorProcessor= new ContributorProcessor();
 
-	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, List<IContributorHandle> sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IAttribute sourceAttribute, List<IContributorHandle> sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
 		if (sourceValue == null || sourceValue.isEmpty()) {
 			return;
 		}

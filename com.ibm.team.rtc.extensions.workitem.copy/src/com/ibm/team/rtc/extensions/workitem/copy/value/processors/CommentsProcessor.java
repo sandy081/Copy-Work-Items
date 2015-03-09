@@ -31,7 +31,7 @@ public class CommentsProcessor extends AbstractReplacementValueProcessor<List<IC
 	private final ContributorProcessor fContributorProcessor= new ContributorProcessor();
 
 	@Override
-	public void prepareTargetValue(final IWorkItem target, final IAttribute attribute, List<IComment> sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(final IWorkItem target, final IAttribute attribute, IAttribute sourceAttribute, List<IComment> sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
 		for (final IComment sourceComment : sourceValue) {
 			context.sourceContext.itemResolver.resolve(sourceComment.getCreator()).success(new ICallback<IItem>() {
 				@Override

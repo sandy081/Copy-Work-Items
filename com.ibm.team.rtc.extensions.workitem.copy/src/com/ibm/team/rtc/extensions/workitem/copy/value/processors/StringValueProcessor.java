@@ -18,7 +18,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 public class StringValueProcessor extends AbstractReplacementValueProcessor<String> {
 
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, String sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, String sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		setValue(target, targetAttribute, replace(sourceValue, context));
 	}
 }

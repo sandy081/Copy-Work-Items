@@ -23,7 +23,7 @@ import com.ibm.team.workitem.common.workflow.IWorkflowInfo;
 public class ResolutionProcessor extends AbstractValueProcessor<String> {
 
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute attribute, String sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem target, IAttribute attribute, IAttribute sourceAttribute, String sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		IWorkflowInfo workflowInfo= context.targetContext.workItemClient.findWorkflowInfo(target, monitor);
 		for (Identifier<IResolution> resolution : workflowInfo.getAllResolutionIds()) {
 			String targetValue= resolution.getStringIdentifier();

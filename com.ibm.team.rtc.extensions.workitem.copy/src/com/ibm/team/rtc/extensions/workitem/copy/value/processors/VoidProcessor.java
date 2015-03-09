@@ -19,6 +19,6 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 public class VoidProcessor implements IValueProcessor<Object> {
 
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, Object sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {}
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, Object sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {}
 
 }

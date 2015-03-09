@@ -19,6 +19,7 @@ public class ValueProcessors {
 	private static HashMap<String, IValueProcessor<?>> fProcessorsById= new HashMap<String, IValueProcessor<?>>();
 	private static HashMap<String, IValueProcessor<?>> fProcessors= new HashMap<String, IValueProcessor<?>>();
 
+	private static final EnumerationValueProcessor ENUM_PROCESSOR= new EnumerationValueProcessor();
 	private static final IValueProcessor<?> NULL_PROCESSOR= new VoidProcessor();
 	private static final IValueProcessor<?> DEFAULT_PROCESSOR= new DefaultValueProcessor<Object>();
 
@@ -61,6 +62,10 @@ public class ValueProcessors {
 		IValueProcessor<?> processor= fProcessors.get(attributeType);
 		if (processor != null) {
 			return (IValueProcessor<T>)processor;
+		}
+
+		if (AttributeTypes.isEnumerationAttributeType(attributeType)) {
+			return (IValueProcessor<T>)ENUM_PROCESSOR;
 		}
 
 		if (AttributeTypes.isItemAttributeType(attributeType) 

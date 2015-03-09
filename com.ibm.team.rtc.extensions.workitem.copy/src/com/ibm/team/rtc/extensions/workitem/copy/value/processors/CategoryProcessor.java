@@ -26,7 +26,7 @@ public class CategoryProcessor extends AbstractValueProcessor<ICategoryHandle> {
 	private static final Key<ICategoryHandle> TARGET_CATEGORY_KEY= new Key<ICategoryHandle>(CategoryProcessor.class.getName() + "_targetCategory");
 
 	@Override
-	public void prepareTargetValue(IWorkItem targetWorkItem, IAttribute targetAttribute, ICategoryHandle sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem targetWorkItem, IAttribute targetAttribute, IAttribute sourceAttribute, ICategoryHandle sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		ICategoryHandle targetValue= context.get(TARGET_CATEGORY_KEY);
 		if (targetValue == null) {
 			// Get the mapped value

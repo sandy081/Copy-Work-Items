@@ -18,7 +18,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 
 public class DefaultValueProcessor<T> extends AbstractValueProcessor<T> {
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		setValue(target, targetAttribute, sourceValue);
 	}
 

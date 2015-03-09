@@ -22,7 +22,7 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 public abstract class ValueSetProcessor<T> extends AbstractValueProcessor<T> {
 
 	@Override
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
 		Key<Collection<String>> requiredAttributesKey= new Key<Collection<String>>("RequiredAttributes_" + target.getItemId().getUuidValue());
 		Collection<String> requiredAttributes= context.get(requiredAttributesKey);
 		if (requiredAttributes == null) {

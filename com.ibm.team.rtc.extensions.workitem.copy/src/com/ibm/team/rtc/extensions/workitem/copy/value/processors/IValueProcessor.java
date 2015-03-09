@@ -17,6 +17,6 @@ import com.ibm.team.workitem.common.model.IWorkItem;
 
 public interface IValueProcessor<T> {
 
-	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException;
+	public void prepareTargetValue(IWorkItem target, IAttribute targetAttribute, IAttribute sourceAttribute, T sourceValue, EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException;
 
 }
