@@ -16,6 +16,7 @@ import com.ibm.team.workitem.common.query.IQueryDescriptor;
 public class EvaluationContext {
 
 	public IQueryDescriptor queryDescriptor;
+	public String message;
 
 	public RepositoryContext sourceContext;
 	public RepositoryContext targetContext;

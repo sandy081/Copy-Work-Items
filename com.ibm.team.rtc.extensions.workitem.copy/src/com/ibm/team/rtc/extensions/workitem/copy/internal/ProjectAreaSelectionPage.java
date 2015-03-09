@@ -46,7 +46,6 @@ import com.ibm.team.repository.client.ITeamRepository;
 import com.ibm.team.repository.client.TeamPlatform;
 import com.ibm.team.repository.common.TeamRepositoryException;
 import com.ibm.team.repository.common.service.IPermissionService;
-import com.ibm.team.rtc.extensions.workitem.copy.WorkItemsCopyPlugIn;
 import com.ibm.team.workitem.rcp.ui.internal.ProjectAreaPicker;
 import com.ibm.team.workitem.rcp.ui.internal.viewer.ItemComparer;
 
@@ -118,6 +117,7 @@ public class ProjectAreaSelectionPage extends WizardPage {
 	}
 
 	private void withRepository(ITeamRepository repository) {
+		fContext.message= null;
 		fContext.targetContext= new RepositoryContext(true, repository);
 		setPageComplete(false);
 		fViewer.setInput("");
@@ -129,10 +129,10 @@ public class ProjectAreaSelectionPage extends WizardPage {
 				try {
 					fContext.targetContext.isAdmin= fContext.targetContext.teamRepository.externalUserRegistryManager().isMember(fContext.targetContext.teamRepository.getUserId(), IPermissionService.JAZZ_ADMINS, new SubProgressMonitor(monitor, 200));
 					fContext.targetContext.isAdmin= true;
-					return Status.OK_STATUS;
 				} catch (TeamRepositoryException e) {
-					return new Status(IStatus.ERROR, WorkItemsCopyPlugIn.ID, e.getMessage(), e);
+					fContext.message= e.getMessage();
 				}
+				return Status.OK_STATUS;
 			}
 
 			@Override
@@ -144,6 +144,11 @@ public class ProjectAreaSelectionPage extends WizardPage {
 	}
 
 	private void computeProjectAreas() {
+		if (fContext.message != null) {
+			setErrorMessage(fContext.message);
+			return;
+		}
+
 		if (fContext.targetContext == null) {
 			setErrorMessage("Not connected to any project areas");
 			return;

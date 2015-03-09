@@ -48,7 +48,7 @@ public class AttachmentProcessor implements ILinkProcessor {
 		} catch (FileNotFoundException e) {
 			throw new TeamRepositoryException(e);
 		}
-		context.sourceContext.contentManager.retrieveContent(sourceValue.getContent(), stream, SubMonitor.convert(monitor));
+		context.sourceContext.contentManager.retrieveContent(sourceValue.getContent(), stream, SubMonitor.convert(monitor, 1));
 		targetReferences.add(WorkItemEndPoints.ATTACHMENT, com.ibm.team.workitem.rcp.ui.internal.util.Utils.createReference(file));
 	}
 }
