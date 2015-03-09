@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+
+	     <objectContribution
+	        adaptable="true"
+	        id="com.ibm.team.rtc.extensions.workitem.copy.query"
+	        objectClass="com.ibm.team.workitem.common.query.IQueryDescriptorHandle"> 
+	        <action
+	               label="Copy Work Items..."
+	               class="com.ibm.team.rtc.extensions.workitem.copy.internal.CopyWorkItemsFromQuery"
+	               enablesFor="1"
+	               id="com.ibm.team.rtc.extensions.workitem.copy">
+	         </action>
+		</objectContribution>	    
+         
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+         
+         <wizard
+            name="Copy Work Items"
+            icon="icons/obj16/workitem_export_obj.gif"
+            category="org.eclipse.team.ui.exportWizards"
+            class="com.ibm.team.rtc.extensions.workitem.copy.internal.CopyWorkItemsFromQueryWizard"
+            id="com.ibm.team.rtc.extensions.workitem.copy">
+         <description>
+            Copy Work Items
+         </description>
+      </wizard>
+         
+   </extension>
+
+</plugin>

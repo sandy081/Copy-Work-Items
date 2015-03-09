@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.ibm.team.rtc.extensions.workitem.feature"
+      label="RTC Work Item Extensions"
+      version="1.0.0.qualifier"
+      provider-name="IBM">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import feature="com.ibm.team.rtc.client.feature" version="4.5.300.qualifier"/>
+   </requires>
+
+   <plugin
+         id="com.ibm.team.rtc.extensions.workitem.copy"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
