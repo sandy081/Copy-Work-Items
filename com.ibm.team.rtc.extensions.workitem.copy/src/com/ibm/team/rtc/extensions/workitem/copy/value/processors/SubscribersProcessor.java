@@ -33,8 +33,8 @@ public class SubscribersProcessor implements IValueProcessor<List<IContributorHa
 		}
 
 		for (IContributorHandle source : sourceValue) {
-			context.sourceContext.itemResolver.resolve(source).success(new ICallback<IItem>() {
-				public void with(IItem result) throws TeamRepositoryException {
+			context.sourceContext.itemResolver.resolve(source, monitor).success(new ICallback<IItem>() {
+				public void with(IItem result, IProgressMonitor monitor) throws TeamRepositoryException {
 					IContributorHandle targetValue= fContributorProcessor.getMapping((IContributor)result, context, monitor);
 					if (!DefaultModel.NULL_CONTRIBUTOR_ITEM_ID.equals(targetValue.getItemId())) {
 						target.getSubscriptions().add(targetValue);

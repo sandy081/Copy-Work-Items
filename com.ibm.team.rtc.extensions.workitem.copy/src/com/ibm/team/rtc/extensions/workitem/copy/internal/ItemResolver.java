@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import com.ibm.team.repository.client.IItemManager;
 import com.ibm.team.repository.client.ITeamRepository;
@@ -25,7 +26,7 @@ import com.ibm.team.repository.common.UUID;
 public class ItemResolver {
 
 	public interface ICallback<T> {
-		public void with(T result) throws TeamRepositoryException;
+		public void with(T result, IProgressMonitor monitor) throws TeamRepositoryException;
 	}
 
 	private final IItemManager fManager;
@@ -38,11 +39,11 @@ public class ItemResolver {
 		fManager= repository.itemManager();
 	}
 
-	public <H extends IItemHandle, V extends IItem> Deferred<V> resolve(H handle) throws TeamRepositoryException {
-		Deferred<V> deferred= new Deferred<V>();
+	public <H extends IItemHandle, V extends IItem> Deferred<V> resolve(H handle, IProgressMonitor monitor) throws TeamRepositoryException {
+		Deferred<V> deferred= new Deferred<V>(monitor);
 		V item= (V)fResolved.get(handle.getItemId());
 		if (item != null) {
-			return deferred.onResolved(item);
+			return deferred.onResolved(item, monitor);
 		}
 
 		fDeferreds.add((Deferred<IItem>)deferred);
@@ -55,12 +56,12 @@ public class ItemResolver {
 			return;
 
 		try {
-			addToResolvedList(fManager.fetchCompleteItems(fItemsToResolve, IItemManager.DEFAULT, monitor));
+			addToResolvedList(fManager.fetchCompleteItems(fItemsToResolve, IItemManager.DEFAULT, SubMonitor.convert(monitor, fItemsToResolve.size())));
 			for (int i= 0; i < fItemsToResolve.size(); i++) {
 				IItemHandle handle= fItemsToResolve.get(i);
 				Deferred<IItem> deferred= fDeferreds.get(i);
 				IItem item= fResolved.get(handle.getItemId());
-				deferred.onResolved(item);
+				deferred.onResolved(item, monitor);
 			}
 		} finally {
 			fDeferreds.clear();
@@ -76,21 +77,26 @@ public class ItemResolver {
 
 	public static class Deferred<T extends IItem> {
 
+		private final IProgressMonitor fMonitor;
 		private ICallback<T> fSuccess;
 		private T fResult;
+
+		public Deferred(IProgressMonitor monitor) {
+			fMonitor= monitor;
+		}
 
 		public Deferred<T> success(ICallback<T> success) throws TeamRepositoryException {
 			fSuccess= success;
 			if (fResult != null) {
-				onResolved(fResult);
+				onResolved(fResult, fMonitor);
 			}
 			return this;
 		}
 
-		private Deferred<T> onResolved(IItem result) throws TeamRepositoryException {
+		private Deferred<T> onResolved(IItem result, IProgressMonitor monitor) throws TeamRepositoryException {
 			fResult= (T)result;
 			if (fSuccess != null) {
-				fSuccess.with(fResult);
+				fSuccess.with(fResult, monitor);
 			}
 			return this;
 		}

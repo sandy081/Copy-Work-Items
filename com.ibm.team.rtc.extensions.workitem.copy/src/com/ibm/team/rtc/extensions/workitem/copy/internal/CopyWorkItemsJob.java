@@ -9,8 +9,9 @@
 package com.ibm.team.rtc.extensions.workitem.copy.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,30 +51,18 @@ public class CopyWorkItemsJob {
 		List<IWorkItemHandle> allSources= new ArrayList<IWorkItemHandle>();
 		List<IWorkItemHandle> allTargets= new ArrayList<IWorkItemHandle>();
 		try {
-			Collection<IAttribute> sourceAttributes= new SourceAttributes(fContext).get(progress.newChild(1));
-			TargetAttributes targetAttributes= new TargetAttributes(fContext);
-
 			WorkItemsResolver workItemsResolver= new WorkItemsResolver(fContext);
 			IWorkItems workItems= workItemsResolver.resolve(progress.newChild(10));
-
 			int totalResultsSize= workItemsResolver.getTotalResultsSize();
-			progress.beginTask("Copy Work Items", (totalResultsSize * 5));
 
-			int batchNumber= 0;
-			while (workItems.hasNext()) {
-				Collection<IWorkItem> batch= workItems.next();
-				List<WorkItemWorkingCopy> targets= createTargets(batch, sourceAttributes, targetAttributes, batchNumber, totalResultsSize, progress);
-				for (WorkItemWorkingCopy target : targets) {
-					allTargets.add(target.getWorkItem());
-				}
+			progress.beginTask("Copy Work Items", (totalResultsSize * 7));
 
-				batchNumber++;
-				allSources.addAll(batch);
-			}
-
-			if (fContext.configuration.copyLinks) {
-				createLinks(allSources, Arrays.asList(WorkItemEndPoints.ATTACHMENT), progress);
-			}
+			TargetAttributes targetAttributes= new TargetAttributes(fContext);
+			List<WorkItemWorkingCopy> targets= createTargets(workItems, targetAttributes, allSources, allTargets, totalResultsSize, progress);
+			
+			prepareAttributesForTargets(targets, targetAttributes, progress);
+			prepareLinksForTargets(targets, progress);
+			copyTargets(targets, progress);
 
 		} finally {
 			for (IWorkItemHandle source : allSources) {
@@ -89,53 +78,98 @@ public class CopyWorkItemsJob {
 		return allTargets;
 	}
 
-	private List<WorkItemWorkingCopy> createTargets(Collection<IWorkItem> sources, Collection<IAttribute> sourceAttributes, TargetAttributes targetAttributes, int batchNumber, int totalResultsSize, SubMonitor progress) throws TeamRepositoryException {
-		List<WorkItemWorkingCopy> workingCopies= new ArrayList<WorkItemWorkingCopy>(sources.size());
+	private List<WorkItemWorkingCopy> createTargets(IWorkItems workItems, TargetAttributes targetAttributes, List<IWorkItemHandle> allSources, List<IWorkItemHandle> allTargets, int totalResultsSize, SubMonitor progress) throws TeamRepositoryException {
+		List<WorkItemWorkingCopy> targets= new ArrayList<WorkItemWorkingCopy>();
+		SubMonitor creationMonitor= progress.newChild(totalResultsSize);
 		int counter= 1;
-		SubMonitor preparingMonitor= progress.newChild(sources.size() * 2);
-		for (IWorkItem source : sources) {
+		while (workItems.hasNext()) {
+			Collection<IWorkItem> batch= workItems.next();
+			for (IWorkItem source : batch) {
+				SubMonitor singleMonitor= creationMonitor.newChild(1);
+				singleMonitor.setTaskName("Creating Work Item " + "(" + counter + " of " + totalResultsSize + ")");
+				String targetType= new WorkItemTypeProcessor().getMapping(null, targetAttributes.findAttribute(IWorkItem.TYPE_PROPERTY, singleMonitor), source.getWorkItemType(), fContext, singleMonitor);
+				WorkItemWorkingCopy target= newTarget(targetType, singleMonitor);
+				
+				fContext.sourceContext.addPair(source, target.getWorkItem());
+				fContext.targetContext.addPair(target.getWorkItem(), source);
+				
+				targets.add(target);
+				allSources.add(source);
+				allTargets.add(target.getWorkItem());
+				
+				singleMonitor.done();
+				counter++;
+			}
+		}
+		creationMonitor.done();
+		return targets;
+	}
 
-			SubMonitor singleMonitor= preparingMonitor.newChild(1);
-			String preparingMessage= "Preparing copies " + (fContext.configuration.copyAttachments ? "with attachments " : "");
-			singleMonitor.setTaskName(preparingMessage + "(" + ((batchNumber * WorkItemsResolver.BATCH_SIZE) + counter) + " of " + totalResultsSize + ")");
-
-			String targetType= new WorkItemTypeProcessor().getMapping(null, targetAttributes.findAttribute(IWorkItem.TYPE_PROPERTY, singleMonitor), source.getWorkItemType(), fContext, preparingMonitor);
-			WorkItemWorkingCopy target= newTarget(targetType, singleMonitor);
-
-			for (IAttribute sourceAttribute : sourceAttributes) {
-				IValueProcessor<Object> processor= (IValueProcessor<Object>)ValueProcessors.getProcessor(sourceAttribute);
-				IAttribute targetAttribute= targetAttributes.findAttribute(sourceAttribute.getIdentifier(), singleMonitor);
-				if (source.hasAttribute(sourceAttribute)) {
-					processor.prepareTargetValue(target.getWorkItem(), targetAttribute, sourceAttribute, source.getValue(sourceAttribute), fContext, singleMonitor);
+	private List<WorkItemWorkingCopy> prepareAttributesForTargets(List<WorkItemWorkingCopy> workingCopies, TargetAttributes targetAttributes, SubMonitor progress) throws TeamRepositoryException {
+		Collection<IAttribute> sourceAttributes= new SourceAttributes(fContext).get(progress.newChild(1));
+		BatchIterator<WorkItemWorkingCopy> iterator= new BatchIterator<WorkItemWorkingCopy>(workingCopies, WorkItemsResolver.BATCH_SIZE);
+		int counter= 1;
+		while (iterator.hasNext()) {
+			Collection<WorkItemWorkingCopy> batch= iterator.next();
+			SubMonitor preparingMonitor= progress.newChild(batch.size());
+			
+			for (WorkItemWorkingCopy target : batch) {
+				SubMonitor singleMonitor= preparingMonitor.newChild(1);
+				singleMonitor.setTaskName("Preparing copies " + "(" + counter + " of " + workingCopies.size() + ")");
+				for (IAttribute sourceAttribute : sourceAttributes) {
+					IValueProcessor<Object> processor= (IValueProcessor<Object>)ValueProcessors.getProcessor(sourceAttribute);
+					IAttribute targetAttribute= targetAttributes.findAttribute(sourceAttribute.getIdentifier(), singleMonitor);
+					IWorkItem source= fContext.targetContext.getPair(target.getWorkItem());
+					if (source.hasAttribute(sourceAttribute)) {
+						processor.prepareTargetValue(target.getWorkItem(), targetAttribute, sourceAttribute, source.getValue(sourceAttribute), fContext, singleMonitor);
+					}
 				}
+				counter++;
+				singleMonitor.done();
 			}
+			fContext.sourceContext.itemResolver.execute(preparingMonitor);
+			fContext.targetContext.itemResolver.execute(preparingMonitor);
+			preparingMonitor.done();
+		}
+		return workingCopies;
+	}
 
-			if (fContext.configuration.copyAttachments) {
-				IWorkItemReferences sourceReferences= fContext.sourceContext.workingCopyManager.getWorkingCopy(source).getReferences();
-				updateEndPoint(sourceReferences, target.getReferences(), WorkItemEndPoints.ATTACHMENT, singleMonitor);
+	private void prepareLinksForTargets(List<WorkItemWorkingCopy> workingCopies, SubMonitor progress) throws TeamRepositoryException {
+		SubMonitor linksMonitor= progress.newChild(workingCopies.size() * 2);
+		int counter= 1;
+		for (WorkItemWorkingCopy target : workingCopies) {
+			SubMonitor singleMonitor= linksMonitor.newChild(1);
+			String preparingMessage= "Preparing links " + (fContext.configuration.copyAttachments ? "with attachments " : "");
+			singleMonitor.setTaskName(preparingMessage + "(" + counter + " of " + workingCopies.size() + ")");
+
+			IWorkItemReferences sourceReferences= fContext.sourceContext.workingCopyManager.getWorkingCopy(fContext.targetContext.getPair(target.getWorkItem())).getReferences();
+			IWorkItemReferences targetReferences= target.getReferences();
+			for (IEndPointDescriptor endPoint : getEndPointsToCopy(sourceReferences)) {
+				updateEndPoint(sourceReferences, targetReferences, endPoint, singleMonitor);
 			}
-
-			workingCopies.add(target);
-			fContext.sourceContext.addPair(source, target.getWorkItem());
-			fContext.targetContext.addPair(target.getWorkItem(), source);
-			singleMonitor.done();
 			counter++;
 		}
-		fContext.sourceContext.itemResolver.execute(preparingMonitor);
-		fContext.targetContext.itemResolver.execute(preparingMonitor);
-		preparingMonitor.done();
-
-		for (WorkItemWorkingCopy target : workingCopies) {
-			XMLString copiedFromCommentText= XMLString.createFromXMLText("Copied from " + createTextLink((IWorkItem)fContext.targetContext.getPair(target.getWorkItem())));
-			IComment comment= target.getWorkItem().getComments().createComment(fContext.targetContext.auditableClient.getUser(), copiedFromCommentText);
-			target.getWorkItem().getComments().append(comment);
+		fContext.sourceContext.itemResolver.execute(linksMonitor);
+		fContext.targetContext.itemResolver.execute(linksMonitor);
+		linksMonitor.done();
+	}
+	
+	private void copyTargets(List<WorkItemWorkingCopy> workingCopies, SubMonitor monitor) throws TeamRepositoryException {
+		BatchIterator<WorkItemWorkingCopy> iterator= new BatchIterator<WorkItemWorkingCopy>(workingCopies, WorkItemsResolver.BATCH_SIZE);
+		int batchNumber= 0;
+		while (iterator.hasNext()) {
+			Collection<WorkItemWorkingCopy> batch= iterator.next();
+			for (WorkItemWorkingCopy target : batch) {
+				XMLString copiedFromCommentText= XMLString.createFromXMLText("Copied from " + createTextLink((IWorkItem)fContext.targetContext.getPair(target.getWorkItem())));
+				IComment comment= target.getWorkItem().getComments().createComment(fContext.targetContext.auditableClient.getUser(), copiedFromCommentText);
+				target.getWorkItem().getComments().append(comment);
+			}
+			SubMonitor saveMonitor= monitor.newChild(batch.size());
+			saveMonitor.setTaskName("Copying " + ((batchNumber * 100) + batch.size()) + " Work Items (" + workingCopies.size() + ")");
+			fContext.targetContext.workingCopyManager.save(batch.toArray(new WorkItemWorkingCopy[batch.size()]), saveMonitor);
+			batchNumber++;
+			saveMonitor.done();
 		}
-
-		SubMonitor saveMonitor= progress.newChild(sources.size());
-		saveMonitor.setTaskName("Copying " + ((batchNumber * 100) + sources.size()) + " Work Items (" + totalResultsSize + ")");
-		fContext.targetContext.workingCopyManager.save(workingCopies.toArray(new WorkItemWorkingCopy[workingCopies.size()]), saveMonitor);
-		saveMonitor.done();
-		return workingCopies;
 	}
 
 	private WorkItemWorkingCopy newTarget(String type, IProgressMonitor monitor) throws TeamRepositoryException {
@@ -147,46 +181,15 @@ public class CopyWorkItemsJob {
 		return fContext.targetContext.workingCopyManager.getWorkingCopy(workItemHandle);
 	}
 
-	private void createLinks(List<IWorkItemHandle> sources, List<IEndPointDescriptor> exclude, SubMonitor progress) throws TeamRepositoryException {
-		sources= new ArrayList<IWorkItemHandle>(sources);
-		int batchNumber= 0;
-		int totalResultsSize= sources.size();
-		while (!sources.isEmpty()) {
-
-			int len= Math.min(sources.size(), WorkItemsResolver.BATCH_SIZE);
-			List<IWorkItemHandle> sourcesChunk= sources.subList(0, len);
-			List<WorkItemWorkingCopy> targets= new ArrayList<WorkItemWorkingCopy>();
-
-			SubMonitor linksMonitor= progress.newChild(sourcesChunk.size());
-			linksMonitor.setTaskName("Copying Links for " + ((batchNumber * WorkItemsResolver.BATCH_SIZE) + sourcesChunk.size()) + " Work Items (" + totalResultsSize + ")...");
-
-			for (IWorkItemHandle source : sourcesChunk) {
-				IWorkItemReferences sourceReferences= fContext.sourceContext.workingCopyManager.getWorkingCopy(source).getReferences();
-				WorkItemWorkingCopy target= fContext.targetContext.workingCopyManager.getWorkingCopy(fContext.sourceContext.getPair(source));
-				IWorkItemReferences targetReferences= target.getReferences();
-				for (IEndPointDescriptor endPoint : sourceReferences.getTypes()) {
-					if (exclude == null || !exclude.contains(endPoint)) {
-						updateEndPoint(sourceReferences, targetReferences, endPoint, linksMonitor);
-					}
-				}
-				targets.add(target);
+	private List<IEndPointDescriptor> getEndPointsToCopy(IWorkItemReferences sourceReferences) {
+		if (fContext.configuration.copyLinks) {
+			List<IEndPointDescriptor> all= new ArrayList<IEndPointDescriptor>(sourceReferences.getTypes());
+			if (!fContext.configuration.copyAttachments) {
+				all.remove(WorkItemEndPoints.ATTACHMENT);
 			}
-
-			fContext.sourceContext.itemResolver.execute(linksMonitor);
-			fContext.targetContext.itemResolver.execute(linksMonitor);
-			List<WorkItemWorkingCopy> updated= new ArrayList<WorkItemWorkingCopy>();
-			for (WorkItemWorkingCopy workingCopy : targets) {
-				if (!workingCopy.getReferences().getChangedReferenceTypes().isEmpty()) {
-					updated.add(workingCopy);
-				}
-			}
-			if (!updated.isEmpty()) {
-				fContext.targetContext.workingCopyManager.save(updated.toArray(new WorkItemWorkingCopy[updated.size()]), linksMonitor);
-			}
-			batchNumber++;
-			linksMonitor.done();
-			sourcesChunk.clear();
+			return all;
 		}
+		return Collections.singletonList(WorkItemEndPoints.ATTACHMENT);
 	}
 
 	private void updateEndPoint(IWorkItemReferences source, IWorkItemReferences target, IEndPointDescriptor endPoint, IProgressMonitor monitor) throws TeamRepositoryException {
@@ -202,5 +205,39 @@ public class CopyWorkItemsJob {
 		String linkText= WorkItemTextUtilities.getWorkItemText(workItem);
 		String uri= Location.namedLocation(workItem, fContext.sourceContext.auditableClient.getPublicRepositoryURI()).toAbsoluteUri().toString();
 		return String.format("<a href=\"%s\">%s</a>", uri, linkText); //$NON-NLS-1$
+	}
+
+	private static class BatchIterator<E> implements Iterator<Collection<E>> {
+
+		private final List<E> fElements;
+		private final int fBatchSize;
+
+		public BatchIterator(Collection<E> elements, int batchSize) {
+			fElements= new ArrayList<E>(elements);
+			fBatchSize= batchSize;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return !getNextChunk().isEmpty();
+		}
+
+		@Override
+		public Collection<E> next() {
+			Collection<E> nextChunk= getNextChunk();
+			Collection<E> next= new ArrayList<E>(nextChunk);
+			nextChunk.clear();
+			return next;
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+		private Collection<E> getNextChunk() {
+			return fElements.subList(0, Math.min(fElements.size(), fBatchSize));
+		}
+
 	}
 }

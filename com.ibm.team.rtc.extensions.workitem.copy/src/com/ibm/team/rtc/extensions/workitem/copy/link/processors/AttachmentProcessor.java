@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import com.ibm.team.links.common.IItemReference;
 import com.ibm.team.links.common.IReference;
@@ -31,9 +32,9 @@ public class AttachmentProcessor implements ILinkProcessor {
 
 	@Override
 	public void prepareTargetLink(final IWorkItemReferences targetReferences, IEndPointDescriptor endPoint, IReference sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
-		context.sourceContext.itemResolver.resolve(((IItemReference)sourceValue).getReferencedItem()).success(new ICallback<IItem>() {
+		context.sourceContext.itemResolver.resolve(((IItemReference)sourceValue).getReferencedItem(), monitor).success(new ICallback<IItem>() {
 			@Override
-			public void with(IItem result) throws TeamRepositoryException {
+			public void with(IItem result, IProgressMonitor monitor) throws TeamRepositoryException {
 				copyAttachments(targetReferences, (IAttachment)result, context, monitor);
 			}
 		});
@@ -47,7 +48,7 @@ public class AttachmentProcessor implements ILinkProcessor {
 		} catch (FileNotFoundException e) {
 			throw new TeamRepositoryException(e);
 		}
-		context.sourceContext.contentManager.retrieveContent(sourceValue.getContent(), stream, monitor);
+		context.sourceContext.contentManager.retrieveContent(sourceValue.getContent(), stream, SubMonitor.convert(monitor));
 		targetReferences.add(WorkItemEndPoints.ATTACHMENT, com.ibm.team.workitem.rcp.ui.internal.util.Utils.createReference(file));
 	}
 }

@@ -51,8 +51,8 @@ public class IterationProcessor extends ItemHandleValueSetProcessor<IIterationHa
 		}
 
 		final Map<String, BacklogPair> targetBacklogs= getBacklogInformation(context.targetContext, monitor);
-		context.targetContext.itemResolver.resolve(context.targetContext.projectArea).success(new ICallback<IItem>() {
-			public void with(IItem result) throws TeamRepositoryException {
+		context.targetContext.itemResolver.resolve(context.targetContext.projectArea, monitor).success(new ICallback<IItem>() {
+			public void with(IItem result, IProgressMonitor monitor) throws TeamRepositoryException {
 				IIterationHandle targetValue= null;
 				IProjectArea projectArea= (IProjectArea)result;
 				if (projectArea.getProjectDevelopmentLine() != null) {

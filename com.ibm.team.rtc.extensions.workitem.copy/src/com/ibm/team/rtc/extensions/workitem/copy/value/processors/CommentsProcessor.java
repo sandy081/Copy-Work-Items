@@ -33,9 +33,9 @@ public class CommentsProcessor extends AbstractReplacementValueProcessor<List<IC
 	@Override
 	public void prepareTargetValue(final IWorkItem target, final IAttribute attribute, IAttribute sourceAttribute, List<IComment> sourceValue, final EvaluationContext context, final IProgressMonitor monitor) throws TeamRepositoryException {
 		for (final IComment sourceComment : sourceValue) {
-			context.sourceContext.itemResolver.resolve(sourceComment.getCreator()).success(new ICallback<IItem>() {
+			context.sourceContext.itemResolver.resolve(sourceComment.getCreator(), monitor).success(new ICallback<IItem>() {
 				@Override
-				public void with(IItem result) throws TeamRepositoryException {
+				public void with(IItem result, IProgressMonitor monitor) throws TeamRepositoryException {
 					IContributorHandle creator= fContributorProcessor.getMapping((IContributor)result, context, monitor);
 					if (DefaultModel.NULL_CONTRIBUTOR_ITEM_ID.equals(creator.getItemId())) {
 						creator= context.targetContext.auditableClient.getUser();

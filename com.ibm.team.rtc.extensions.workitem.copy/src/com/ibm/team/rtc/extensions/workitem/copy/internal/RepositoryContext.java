@@ -22,6 +22,7 @@ import com.ibm.team.workitem.client.IAuditableClient;
 import com.ibm.team.workitem.client.IQueryClient;
 import com.ibm.team.workitem.client.IWorkItemClient;
 import com.ibm.team.workitem.client.IWorkItemWorkingCopyManager;
+import com.ibm.team.workitem.common.model.IWorkItem;
 import com.ibm.team.workitem.common.model.IWorkItemHandle;
 
 @SuppressWarnings("restriction")
@@ -41,7 +42,7 @@ public class RepositoryContext {
 	public final ItemResolver itemResolver;
 
 	public IProjectAreaHandle projectArea;
-	private HashMap<UUID, IWorkItemHandle> fWorkItemPairs= new HashMap<UUID, IWorkItemHandle>();
+	private HashMap<UUID, IWorkItem> fWorkItemPairs= new HashMap<UUID, IWorkItem>();
 
 	public boolean isAdmin= false;
 
@@ -61,11 +62,11 @@ public class RepositoryContext {
 		itemResolver= new ItemResolver(teamRepository);
 	}
 
-	public void addPair(IWorkItemHandle current, IWorkItemHandle remote) {
+	public void addPair(IWorkItemHandle current, IWorkItem remote) {
 		fWorkItemPairs.put(current.getItemId(), remote);
 	}
 
-	public IWorkItemHandle getPair(IWorkItemHandle current) {
+	public IWorkItem getPair(IWorkItemHandle current) {
 		return fWorkItemPairs.get(current.getItemId());
 	}
 
