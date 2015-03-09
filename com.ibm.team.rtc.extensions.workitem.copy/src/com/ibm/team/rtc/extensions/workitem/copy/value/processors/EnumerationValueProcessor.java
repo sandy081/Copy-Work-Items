@@ -64,6 +64,7 @@ public class EnumerationValueProcessor extends AbstractValueProcessor<Identifier
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private IEnumeration<ILiteral> getEnumeration(IAttribute attribute, RepositoryContext context, EvaluationContext evaluationContext, IProgressMonitor monitor) throws TeamRepositoryException {
 		Key<IEnumeration<ILiteral>> key= new Key<IEnumeration<ILiteral>>(context.teamRepository.getId().getUuidValue() + context.projectArea.getItemId().getUuidValue() + attribute.getIdentifier());
 		IEnumeration<ILiteral> enumeration= evaluationContext.get(key);
