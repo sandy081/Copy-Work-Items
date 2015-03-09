@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.ibm.team.rtc.extensions.workitem.feature_1.0.0.201503091527.jar" id="com.ibm.team.rtc.extensions.workitem.feature" version="1.0.0.201503091527"/>
+</site>
