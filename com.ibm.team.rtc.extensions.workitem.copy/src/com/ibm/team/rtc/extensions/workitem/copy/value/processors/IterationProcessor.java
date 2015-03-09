@@ -26,7 +26,7 @@ import com.ibm.team.workitem.common.model.IAttribute;
 import com.ibm.team.workitem.common.model.IWorkItem;
 
 @SuppressWarnings("restriction")
-public class IterationProcessor extends AbstractValueProcessor<IIterationHandle> {
+public class IterationProcessor extends ItemHandleValueSetProcessor<IIterationHandle> {
 
 	@Override
 	public void prepareTargetValue(final IWorkItem target, final IAttribute targetAttribute, IAttribute sourceAttribute, IIterationHandle sourceValue, final EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {
@@ -39,6 +39,7 @@ public class IterationProcessor extends AbstractValueProcessor<IIterationHandle>
 				}
 			}
 		}
+		super.prepareTargetValue(target, targetAttribute, sourceAttribute, sourceValue, context, monitor);
 	}
 
 	private void setTargetBacklog(final IWorkItem target, final IAttribute targetAttribute, final IIterationHandle sourceValue, final EvaluationContext context, IProgressMonitor monitor) throws TeamRepositoryException {

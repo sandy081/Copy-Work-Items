@@ -8,12 +8,11 @@
  *******************************************************************************/
 package com.ibm.team.rtc.extensions.workitem.copy.value.processors;
 
-import com.ibm.team.workitem.common.model.IDeliverableHandle;
+import com.ibm.team.repository.common.IItemHandle;
 
-public class DeliverableValueProcessor extends ValueSetProcessor<IDeliverableHandle> {
-
+public class ItemHandleValueSetProcessor<T extends IItemHandle> extends ValueSetProcessor<T> {
 	@Override
-	protected boolean areSame(IDeliverableHandle value1, IDeliverableHandle value2) {
+	protected boolean areSame(T value1, T value2) {
 		if (value1 == null && value2 == null)
 			return true;
 
@@ -22,5 +21,4 @@ public class DeliverableValueProcessor extends ValueSetProcessor<IDeliverableHan
 
 		return value1.sameItemId(value2);
 	}
-
 }

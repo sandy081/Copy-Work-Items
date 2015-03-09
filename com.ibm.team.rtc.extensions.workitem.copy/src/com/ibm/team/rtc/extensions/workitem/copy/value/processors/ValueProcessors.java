@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import com.ibm.team.workitem.common.model.AttributeTypes;
 import com.ibm.team.workitem.common.model.IAttribute;
+import com.ibm.team.workitem.common.model.IDeliverableHandle;
 import com.ibm.team.workitem.common.model.IWorkItem;
 
 public class ValueProcessors {
@@ -35,7 +36,7 @@ public class ValueProcessors {
 		fProcessors.put(AttributeTypes.SUBSCRIPTIONS, new SubscribersProcessor());
 		fProcessors.put(AttributeTypes.COMMENTS, new CommentsProcessor());
 		fProcessors.put(AttributeTypes.ITERATION, new IterationProcessor());
-		fProcessors.put(AttributeTypes.DELIVERABLE, new DeliverableValueProcessor());
+		fProcessors.put(AttributeTypes.DELIVERABLE, new ItemHandleValueSetProcessor<IDeliverableHandle>());
 
 		for (String type : AttributeTypes.STRING_TYPES) {
 			fProcessors.put(type, new StringValueProcessor());
