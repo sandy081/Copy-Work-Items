@@ -1,11 +1,26 @@
-/*******************************************************************************
- * Licensed Materials - Property of IBM
- * © Copyright IBM Corporation 2015. All Rights Reserved.
- * 
- * Note to U.S. Government Users Restricted Rights:
- * Use, duplication or disclosure restricted by GSA ADP Schedule
- * Contract with IBM Corp. 
- *******************************************************************************/
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Sandeep Somavarapu
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.ibm.team.rtc.extensions.workitem.copy.internal;
 
 import java.util.ArrayList;
@@ -57,19 +72,23 @@ public class CopyWorkItemsJob {
 			WorkItemsResolver workItemsResolver= new WorkItemsResolver(fContext);
 			IWorkItems workItems= workItemsResolver.resolve(progress.newChild(10));
 			int totalResultsSize= workItemsResolver.getTotalResultsSize();
+			TargetAttributes targetAttributes= new TargetAttributes(fContext);
 
 			progress.beginTask("Copy Work Items", (totalResultsSize * 5) + 1);
 
-			TargetAttributes targetAttributes= new TargetAttributes(fContext);
-			List<WorkItemWorkingCopy> targets= createTargets(workItems, targetAttributes, allSources, allTargets, totalResultsSize, progress);
+			// Step 1: Create targets
+			List<WorkItemWorkingCopy> targets= createTargets(workItems, targetAttributes, allSources, allTargets, totalResultsSize, progress.newChild(totalResultsSize));
 			
-			prepareAttributesForTargets(targets, targetAttributes, progress);
-			copyTargets(targets, "Copying Work Items", progress);
+			// Step2: Prepare attributes for save
+			prepareAttributesForTargets(targets, targetAttributes, progress.newChild(totalResultsSize + 1));
+
+			// Step 3: Copy Work Items
+			copyTargets(targets, "Copying Work Items", progress.newChild(totalResultsSize));
 
 			if (fContext.configuration.copyLinks || fContext.configuration.copyAttachments) {
-				copyLinks(targets, progress);
+				// Step 4: Copy links and attachments
+				copyLinks(targets, progress.newChild(totalResultsSize * 2));
 			}
-
 			fContext.status= Status.OK_STATUS;
 		} catch (TeamRepositoryException e) {
 			fContext.status= new Status(IStatus.ERROR, WorkItemsCopyPlugIn.ID, e.getMessage(), e);
@@ -87,9 +106,8 @@ public class CopyWorkItemsJob {
 		progress.done();
 	}
 
-	private List<WorkItemWorkingCopy> createTargets(IWorkItems workItems, TargetAttributes targetAttributes, List<IWorkItemHandle> allSources, List<IWorkItemHandle> allTargets, int totalResultsSize, SubMonitor progress) throws TeamRepositoryException {
+	private List<WorkItemWorkingCopy> createTargets(IWorkItems workItems, TargetAttributes targetAttributes, List<IWorkItemHandle> allSources, List<IWorkItemHandle> allTargets, int totalResultsSize, SubMonitor creationMonitor) throws TeamRepositoryException {
 		List<WorkItemWorkingCopy> targets= new ArrayList<WorkItemWorkingCopy>();
-		SubMonitor creationMonitor= progress.newChild(totalResultsSize);
 		int counter= 1;
 		while (workItems.hasNext()) {
 			Collection<IWorkItem> batch= workItems.next();
@@ -164,10 +182,9 @@ public class CopyWorkItemsJob {
 		}
 	}
 
-	private void copyLinks(List<WorkItemWorkingCopy> targets, SubMonitor progress) throws TeamRepositoryException {
+	private void copyLinks(List<WorkItemWorkingCopy> targets, SubMonitor linksMonitor) throws TeamRepositoryException {
 		if (fContext.configuration.copyLinks || fContext.configuration.copyAttachments) {
 			int counter= 1;
-			SubMonitor linksMonitor= progress.newChild(targets.size() * 2);
 			for (WorkItemWorkingCopy target : targets) {
 				SubMonitor singleMonitor= linksMonitor.newChild(1);
 				String preparingMessage= "Copying links " + (fContext.configuration.copyAttachments ? "with attachments " : "");

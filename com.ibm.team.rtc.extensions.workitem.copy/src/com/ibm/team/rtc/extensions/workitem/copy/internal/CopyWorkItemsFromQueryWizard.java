@@ -18,7 +18,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -97,34 +96,36 @@ public class CopyWorkItemsFromQueryWizard extends Wizard implements IImportWizar
 							new CopyWorkItemsJob(fContext).run(monitor);
 						}
 					});
-					if (fContext.status.isOK()) {
-						new FoundationUIJob("") { //$NON-NLS-1$
-							@Override
-							protected IStatus runProtectedInUI(IProgressMonitor monitor) throws Exception {
-								IWorkbenchWindow w= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-								if (w != null) {
-									List<IWorkItemHandle> toShow= fContext.result.size() > 1000 ? fContext.result.subList(0, 999) : fContext.result;
-									WorkItemUI.showWorkItems(w, fContext.targetContext.projectArea, "Copied Work Items. Showing (" + toShow.size() + " of " + fContext.result.size() + ").", toShow.toArray(new IWorkItemHandle[toShow.size()]));
-								}
-								return Status.OK_STATUS;
-							}
-						}.schedule();
-					}
 				}
 			});
 		} catch (InvocationTargetException e) {
-			IStatus status= new Status(IStatus.ERROR, WorkItemsCopyPlugIn.ID, IStatus.ERROR, "Error While Copying Work Items", e.getCause());
-			ErrorDialog.openError(getContainer().getShell(), "Copy Work Items", "Error While Copying Work Items", status);
-			WorkItemsCopyPlugIn.INSTANCE.logUnexpected(status);
-			// handle error
+			Throwable cause= e.getCause() != null ? e.getCause() : e;
+			fContext.status= new Status(IStatus.ERROR, WorkItemsCopyPlugIn.ID, IStatus.ERROR, cause.getMessage(), cause);
 		} catch (InterruptedException e) {
-			return false;
-			// handle error
+			Throwable cause= e.getCause() != null ? e.getCause() : e;
+			fContext.status= new Status(IStatus.ERROR, WorkItemsCopyPlugIn.ID, IStatus.ERROR, cause.getMessage(), cause);
 		}
+		return postCopy();
+	}
+
+	private boolean postCopy() {
 		if (!fContext.status.isOK()) {
-			((WizardPage)getContainer().getCurrentPage()).setErrorMessage(fContext.status.getMessage());
-			return false;
+			ErrorDialog.openError(getContainer().getShell(), "Copy Work Items", fContext.status.getMessage(), fContext.status);
+			WorkItemsCopyPlugIn.INSTANCE.logUnexpected(fContext.status);
+			return true;
 		}
+
+		new FoundationUIJob("") { //$NON-NLS-1$
+			@Override
+			protected IStatus runProtectedInUI(IProgressMonitor monitor) throws Exception {
+				IWorkbenchWindow w= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (w != null) {
+					List<IWorkItemHandle> toShow= fContext.result.size() > 1000 ? fContext.result.subList(0, 999) : fContext.result;
+					WorkItemUI.showWorkItems(w, fContext.targetContext.projectArea, "Copied Work Items. Showing (" + toShow.size() + " of " + fContext.result.size() + ").", toShow.toArray(new IWorkItemHandle[toShow.size()]));
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 		return true;
 	}
 
