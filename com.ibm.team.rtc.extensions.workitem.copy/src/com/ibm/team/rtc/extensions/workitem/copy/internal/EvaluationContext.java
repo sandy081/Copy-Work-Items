@@ -9,7 +9,11 @@
 package com.ibm.team.rtc.extensions.workitem.copy.internal;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
+import com.ibm.team.workitem.common.model.IWorkItemHandle;
 import com.ibm.team.workitem.common.query.IQueryDescriptor;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -17,6 +21,8 @@ public class EvaluationContext {
 
 	public IQueryDescriptor queryDescriptor;
 	public String message;
+	public IStatus status;
+	public List<IWorkItemHandle> result;
 
 	public RepositoryContext sourceContext;
 	public RepositoryContext targetContext;

@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -27,6 +28,7 @@ import com.ibm.team.foundation.rcp.ui.util.FoundationUIJob;
 import com.ibm.team.repository.client.ITeamRepository;
 import com.ibm.team.repository.common.TeamRepositoryException;
 import com.ibm.team.rtc.extensions.workitem.copy.WorkItemsCopyPlugIn;
+import com.ibm.team.workitem.common.internal.util.Utils;
 import com.ibm.team.workitem.common.model.IWorkItemHandle;
 import com.ibm.team.workitem.common.query.IQueryDescriptor;
 import com.ibm.team.workitem.common.query.IQueryDescriptorHandle;
@@ -35,6 +37,7 @@ import com.ibm.team.workitem.rcp.ui.WorkItemUI;
 /**
  * @since 0.6
  */
+@SuppressWarnings("restriction")
 public class CopyWorkItemsFromQueryWizard extends Wizard implements IImportWizard {
 
 	private EvaluationContext fContext;
@@ -88,22 +91,24 @@ public class CopyWorkItemsFromQueryWizard extends Wizard implements IImportWizar
 			getContainer().run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						final List<IWorkItemHandle> result= new CopyWorkItemsJob(fContext).run(monitor);
+					Utils.runImport(new Runnable() {
+						@Override
+						public void run() {
+							new CopyWorkItemsJob(fContext).run(monitor);
+						}
+					});
+					if (fContext.status.isOK()) {
 						new FoundationUIJob("") { //$NON-NLS-1$
 							@Override
 							protected IStatus runProtectedInUI(IProgressMonitor monitor) throws Exception {
 								IWorkbenchWindow w= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 								if (w != null) {
-									List<IWorkItemHandle> toShow= result.size() > 1000 ? result.subList(0, 999) : result;
-									WorkItemUI.showWorkItems(w, fContext.targetContext.projectArea, "Copied Work Items. Showing (" + toShow.size() + " of " + result.size() + ").", toShow.toArray(new IWorkItemHandle[toShow.size()]));
+									List<IWorkItemHandle> toShow= fContext.result.size() > 1000 ? fContext.result.subList(0, 999) : fContext.result;
+									WorkItemUI.showWorkItems(w, fContext.targetContext.projectArea, "Copied Work Items. Showing (" + toShow.size() + " of " + fContext.result.size() + ").", toShow.toArray(new IWorkItemHandle[toShow.size()]));
 								}
 								return Status.OK_STATUS;
 							}
 						}.schedule();
-
-					} catch (TeamRepositoryException e) {
-						throw new InvocationTargetException(e, e.getMessage());
 					}
 				}
 			});
@@ -115,6 +120,10 @@ public class CopyWorkItemsFromQueryWizard extends Wizard implements IImportWizar
 		} catch (InterruptedException e) {
 			return false;
 			// handle error
+		}
+		if (!fContext.status.isOK()) {
+			((WizardPage)getContainer().getCurrentPage()).setErrorMessage(fContext.status.getMessage());
+			return false;
 		}
 		return true;
 	}
