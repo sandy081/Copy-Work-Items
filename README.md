@@ -21,6 +21,8 @@ Has a nice UI showing the copy progress.
 
 * Copy internal information like Ranking
 
+* Can be performed only be Admins with access to bulk save operation
+
 ### Restrictions
 
 * Users are mapped by user id. Defaults to Unassigned user or Current user (creator, comments)
@@ -59,3 +61,5 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 * Click finish to copy with default options
 
 * Click next to choose options and finish
+
+https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/images/Copy%20Work%20Items%20Option.png
