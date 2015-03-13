@@ -7,7 +7,7 @@ This extension allows you to copy work items from one repository to another repo
 
 ### Features
 
-* Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date, estimates, timespent
+* Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date, estimates and timespent
 
 * Comments, state and resolution details are retained.
 
