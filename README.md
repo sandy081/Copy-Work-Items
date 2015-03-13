@@ -5,10 +5,11 @@ An Eclipse extension for Rational Team Concert (RTC) to copy Work Items across r
 
 This extension allows you to copy work items from one repository to another repository. This can also be used to do bulk copy across project areas in the same repository. If source and target projects are simple scrum based then this can be a tool of choice for importing.
 
+Has a nice UI showing the copy progress.
 
-This retains data only from built in attributes.
+### Features
 
-* Type, Summary, Description, Priority, Severity, Tags, Category
+* Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date,
 
 * All comments are retained
 
@@ -16,29 +17,45 @@ This retains data only from built in attributes.
 
 * States and resolutions are copied
 
-Restrictions
+* Copy links and attachments
+
+* Copy internal information like Ranking
+
+### Restrictions
 
 * Users are mapped by user id. Defaults to Unassigned user or Current user (creator, comments)
 
 * Found In, Planned For are set to unassigned
 
+* Retains data only from built in attributes
 
-It provides following options while copying
+
+### Additional Options
 
 * To replace sensitive information
 
 * Add tags to the copied work items
 
-* Copy the links of the work items
+* Enable or disable copying links and attachments
 
-* Copy attachments
+* Enable or disable copying internal information
 
-* Copy or retain internal information like ranking
+## Install
 
-## Install and Usage
-
-Install it on top of RTC Eclipse Client using the following update site link:
+Install on top of RTC Eclipse Client using the following update site
 
 https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/site.xml
 
 **Pre Requisite** - Rational Team Concert 5.0.2 Client
+
+## Usage
+
+* Create a work item query to match work items to be copied
+
+* Right click on the query and select 'Copy Work Items...' option
+
+* Select the target repository and project area into which work items are to be imported
+
+* Click finish to copy with default options
+
+* Click next to choose options and finish
