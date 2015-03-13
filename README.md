@@ -62,4 +62,4 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 
 * Click next to choose options and finish
 
-https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/images/Copy%20Work%20Items%20Option.png
+<image href: https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/images/Copy%20Work%20Items%20Option.png />
