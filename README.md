@@ -56,7 +56,7 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 
 * Right click on the query and select 'Copy Work Items...' option
 
-!(https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/images/Copy%20Work%20Items%20Option.png)
+![Copy Work Items...](https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/images/Copy%20Work%20Items%20Option.png)
 
 * Select the target repository and project area into which work items are to be imported
 
