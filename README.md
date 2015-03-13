@@ -35,15 +35,9 @@ This extension allows you to copy work items from one repository to another repo
 
 * Retains data only from built in attributes
 
-## Install
-
-Install on top of RTC Eclipse Client using the following update site
-
-https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/site.xml
-
-**Pre Requisite** - Rational Team Concert 5.0.2 Client
-
 ## Usage
+
+Very easy to use.
 
 * Create a work item query to match the work items for copy
 
@@ -54,3 +48,11 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 * Select the target repository and project area into which work items are to be imported
 
 * Click finish to copy with default options or Click next to choose options and finish
+
+## Install
+
+Install on top of RTC Eclipse Client using the following update site
+
+https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/site.xml
+
+**Pre Requisite** - Rational Team Concert 5.0.2 Client
