@@ -5,32 +5,17 @@ An Eclipse extension for Rational Team Concert (RTC) to copy Work Items across r
 
 This extension allows you to copy work items from one repository to another repository. This can also be used to do bulk copy across project areas in the same repository. If source and target projects are simple scrum based then this can be a tool of choice for importing.
 
-Has a nice UI showing the copy progress.
-
 ### Features
 
-* Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date,
+* Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date, estimates, timespent
 
-* All comments are retained
+* Comments, state and resolution details are retained.
 
-* Backlog items are mapped and imported to target backlog
+* Links, Attachments, internal data like ranking can be copied
 
-* States and resolutions are copied
+* Backlog items are imported as backlog items.
 
-* Copy links and attachments
-
-* Copy internal information like Ranking
-
-* Can be performed only be Admins with access to bulk save operation
-
-### Restrictions
-
-* Users are mapped by user id. Defaults to Unassigned user or Current user (creator, comments)
-
-* Found In, Planned For are set to unassigned
-
-* Retains data only from built in attributes
-
+* Secured by allowing only ADMINs to operate.
 
 ### Additional Options
 
@@ -42,6 +27,14 @@ Has a nice UI showing the copy progress.
 
 * Enable or disable copying internal information
 
+### Restrictions
+
+* Users are mapped by user id. Defaults to Unassigned user or Current user (creator, comments)
+
+* Found In, Planned For are set to unassigned
+
+* Retains data only from built in attributes
+
 ## Install
 
 Install on top of RTC Eclipse Client using the following update site
@@ -52,7 +45,7 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 
 ## Usage
 
-* Create a work item query to match work items to be copied
+* Create a work item query to match the work items for copy
 
 * Right click on the query and select 'Copy Work Items...' option
 
@@ -60,6 +53,4 @@ https://raw.githubusercontent.com/sandy081/Copy-Work-Items/master/Update-Site/si
 
 * Select the target repository and project area into which work items are to be imported
 
-* Click finish to copy with default options
-
-* Click next to choose options and finish
+* Click finish to copy with default options or Click next to choose options and finish
