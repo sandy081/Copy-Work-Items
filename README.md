@@ -11,11 +11,11 @@ This extension allows you to copy work items from one repository to another repo
 
 * Comments, state and resolution details are retained.
 
-* Links, Attachments, internal data like ranking can be copied
+* Links, attachments and internal data like rank can be copied
 
 * Backlog items are imported as backlog items.
 
-* Secured by allowing only ADMINs to operate.
+* Secured by allowing only Admins to operate
 
 ### Additional Options
 
