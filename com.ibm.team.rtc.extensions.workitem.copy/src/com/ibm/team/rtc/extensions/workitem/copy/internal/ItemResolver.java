@@ -44,11 +44,11 @@ public class ItemResolver {
 		public void with(T result, IProgressMonitor monitor) throws TeamRepositoryException;
 	}
 
-	private final IItemManager fManager;
 	private final HashMap<UUID, IItem> fResolved= new HashMap<UUID, IItem>();
-
 	private final List<Deferred<IItem>> fDeferreds= new ArrayList<ItemResolver.Deferred<IItem>>();
 	private final List<IItemHandle> fItemsToResolve= new ArrayList<IItemHandle>();
+
+	private final IItemManager fManager;
 
 	public ItemResolver(ITeamRepository repository) {
 		fManager= repository.itemManager();
@@ -81,6 +81,7 @@ public class ItemResolver {
 		} finally {
 			fDeferreds.clear();
 			fItemsToResolve.clear();
+			fResolved.clear();
 		}
 	}
 
