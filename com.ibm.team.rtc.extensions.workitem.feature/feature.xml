@@ -17,10 +17,6 @@
       [Enter License Description here.]
    </license>
 
-   <requires>
-      <import feature="com.ibm.team.rtc.client.feature" version="4.5.300.qualifier"/>
-   </requires>
-
    <plugin
          id="com.ibm.team.rtc.extensions.workitem.copy"
          download-size="0"
