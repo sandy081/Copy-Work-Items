@@ -5,6 +5,8 @@ An Eclipse extension for Rational Team Concert (RTC) to copy Work Items across r
 
 This extension allows you to copy work items from one repository to another repository. This can also be used to do bulk copy across project areas in the same repository. If source and target projects are simple scrum based then this can be a tool of choice for importing.
 
+Description Changed
+
 ### Features
 
 * Copying built in attributes like type, summary, description, tags, priority, severity, complexity, creation date, due date, resolution date, estimates and timespent
